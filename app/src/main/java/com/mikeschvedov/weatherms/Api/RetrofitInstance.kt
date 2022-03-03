@@ -14,4 +14,12 @@ object RetrofitInstance {
 
 
     }
+
+    val api2: LocationAPI by lazy {
+        Retrofit.Builder()
+            .baseUrl("https://api.bigdatacloud.net")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(LocationAPI::class.java)
+    }
 }

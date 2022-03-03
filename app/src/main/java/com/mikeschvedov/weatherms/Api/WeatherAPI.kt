@@ -14,6 +14,7 @@ interface WeatherAPI {
         @Query("lat") latitude : Double,
         @Query("lon") longitude : Double,
         @Query("units") units : String,
+        @Query("lang") language : String,
         @Query("appid") API_key : String
     ) : Response<CurrentWeatherData>
 }

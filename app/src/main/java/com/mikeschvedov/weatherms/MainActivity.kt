@@ -15,6 +15,7 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.tasks.Task
 import com.mikeschvedov.weatherms.Api.RetrofitInstance
+import com.mikeschvedov.weatherms.Models.Weather
 import com.mikeschvedov.weatherms.databinding.ActivityMainBinding
 import com.mikeschvedov.weatherms.util.Constants
 import kotlinx.coroutines.Dispatchers.IO
@@ -71,6 +72,7 @@ class MainActivity : AppCompatActivity() {
                         // AFTER SUCCESSFULLY GETTING DEVICE'S COORDINATES, WE MAKE THE API CALL (USING THE COORDINATES)
                         lifecycleScope.launch  {
                             getWeather(it.latitude, it.longitude)
+                            getLocation(it.latitude, it.longitude)
                         }
                     }
                 }
@@ -82,12 +84,12 @@ class MainActivity : AppCompatActivity() {
 
     private suspend fun getWeather(latitude: Double, longitude: Double) {
 
-        Log.e(TAG, "get data")
         val response = try {
             RetrofitInstance.api.getCurrentWeather(
                 latitude = latitude,
                 longitude = longitude,
                 units = "metric",
+                language = "he",
                 API_key = Constants.OPEN_WEATHER_API_KEY
             )
         } catch (e: IOException) {
@@ -107,12 +109,22 @@ class MainActivity : AppCompatActivity() {
             // FORMATTING THE TEMPERATURE AND BINDING TO VIEW
             val temp : Int = response.body()!!.main.temp.roundToInt()
             binding.temperatureTxtview.text = "${temp}°"
+
+            // GETTING AND BINDING THE WEATHER DESCRIPTION
+            val status : String = response.body()!!.weather[0].description
+            binding.statusTxtview.text = "${status}"
+
+            // GETTING AND BINDING THE HUMIDITY
+            val humidity : Int = response.body()!!.main.humidity
+            var humidity_str = "${humidity}%"
+            binding.humidityTxtview.text = "לחות: ${humidity_str}"
+
+            // GETTING AND BINDING CHANCE OF RAIN
+           // val rain : Int = response.body()!!
+           // binding.rainTxtview.text = ""
 /*
-            binding.statusTxtview.text = ""
 
-            binding.humidityTxtview.text = "sd"
 
-            binding.rainTxtview.text = ""
 
             // BINDING DAY 1
             binding.day1Date.text = ""
@@ -135,15 +147,37 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-/*
-    private fun getLocationAndWeather() {
 
+    private suspend fun getLocation(latitude: Double, longitude: Double) {
 
-        //binding.progressBar.isVisible = false
+        val response = try {
+            RetrofitInstance.api2.getLocationData(
+                latitude = latitude,
+                longitude = longitude,
+                language = "he",
+                key = Constants.BIG_DATA_API_KEY
+            )
+        } catch (e: IOException) {
+            Log.e(TAG, "IOException, you might not have internet connection (getLocation)")
+            return
+        } catch (e: HttpException) {
+            Log.e(TAG, "HttpException, unexpected response (getLocation)")
+            return
+        }
+        if (response.isSuccessful && response.body() != null) {
+
+            // GETTING AND BINDING CITY AND COUNTRY NAMES
+            val city : String = response.body()!!.city
+            val country : String = response.body()!!.countryName
+
+            Log.e("LocationAPI", "${city}, ${country}")
+            binding.cityTxtview.text = "${city}, ${country}"
+
+        } else {
+            Log.e(TAG, "Response not successful (getLocation)")
+        }
+
     }
-*/
-
-
 
 
 
