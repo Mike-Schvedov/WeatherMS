@@ -190,7 +190,7 @@ class MainActivity : AppCompatActivity() {
 
             // ----------- GETTING DAILY FORECAST DATA -------------//
 
-            // ------- Get Tomorrow -------//
+            // ------------------------------- Get DAY 1 (Tomorrow) -------------------------------------//
             val day1: Daily = response.body()!!.daily[1]
 
             // get date
@@ -199,25 +199,116 @@ class MainActivity : AppCompatActivity() {
             // get temp
             binding.tempDay1.text = "${day1.temp.day.roundToInt().toString()}°"
 
-            // ------- Get Day After Tomorrow -------//
+            // get and set status image
+            println("WEATHER STATUS ${day1.weather[0].description}  DAY 1")
+
+            val statusID: Int = checkStatusID(day1.weather[0].description)
+
+            when(statusID){
+
+                1,4 ->
+                    binding.imageviewDay1.setImageResource(R.drawable.partly_cloud)
+                2 ->
+                    binding.imageviewDay1.setImageResource(R.drawable.clear_sunny)
+                3,6 ->
+                    binding.imageviewDay1.setImageResource(R.drawable.rain)
+                5 ->
+                    binding.imageviewDay1.setImageResource(R.drawable.cloudy)
+
+                else ->
+                    binding.imageviewDay1.setImageResource(R.drawable.error)
+            }
+
+
+            // ------------------------------- Get DAY 2 -------------------------------------//
             val day2: Daily = response.body()!!.daily[2]
+
             // get date
             binding.day2Date.text = getDay(2)
+
             // get temp
             binding.tempDay2.text = "${day2.temp.day.roundToInt().toString()}°"
 
-            // ------- Get Third Day -------//
+
+            // get and set status image
+            println("WEATHER STATUS ${day2.weather[0].description}  DAY 2")
+
+            val statusID2: Int = checkStatusID(day2.weather[0].description)
+
+            when(statusID2){
+
+                1,4 ->
+                    binding.imageviewDay2.setImageResource(R.drawable.partly_cloud)
+                2 ->
+                    binding.imageviewDay2.setImageResource(R.drawable.clear_sunny)
+                3,6 ->
+                    binding.imageviewDay2.setImageResource(R.drawable.rain)
+                5 ->
+                    binding.imageviewDay2.setImageResource(R.drawable.cloudy)
+
+                else ->
+                    binding.imageviewDay2.setImageResource(R.drawable.error)
+            }
+
+
+
+            // ------------------------------- Get DAY 3-------------------------------------//
             val day3: Daily = response.body()!!.daily[3]
+
             // get date
             binding.day3Date.text = getDay(3)
+
             // get temp
             binding.tempDay3.text = "${day3.temp.day.roundToInt().toString()}°"
+
+            // get and set status image
+            println("WEATHER STATUS ${day3.weather[0].description}  DAY 3")
+
+            val statusID3: Int = checkStatusID(day3.weather[0].description)
+
+            when(statusID3){
+
+                1,4 ->
+                    binding.imageviewDay3.setImageResource(R.drawable.partly_cloud)
+                2 ->
+                    binding.imageviewDay3.setImageResource(R.drawable.clear_sunny)
+                3,6 ->
+                    binding.imageviewDay3.setImageResource(R.drawable.rain)
+                5 ->
+                    binding.imageviewDay3.setImageResource(R.drawable.cloudy)
+
+                else ->
+                    binding.imageviewDay3.setImageResource(R.drawable.error)
+            }
+
 
         } else {
             Log.e(TAG, "Response not successful (RainAndForcast)")
         }
 
     }
+
+
+
+    private fun checkStatusID(description: String): Int {
+
+        return when(description){
+
+            "מעונן חלקית" -> 1
+            "שמיים בהירים" -> 2
+            "גשם קל" -> 3
+            "עננים בודדים" -> 4
+            "מעונן" -> 5
+            "שברי ענן" -> 6
+            else -> 0
+
+        }
+
+    }
+
+
+
+
 
     fun getDay(nextDay: Int): String {
         val calendar = Calendar.getInstance()

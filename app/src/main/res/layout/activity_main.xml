@@ -156,13 +156,14 @@
                 android:textColor="@color/white" />
             <ImageView
                 android:layout_width="50dp"
+                android:layout_marginTop="6dp"
                 android:layout_gravity="center"
                 android:layout_height="50dp"
-                android:src="@drawable/sunny_icon"
+                android:src="@drawable/clear_sunny"
                 android:id="@+id/imageview_day1"/>
             <TextView
                 android:layout_width="match_parent"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="4dp"
                 android:textSize="24dp"
                 android:textStyle="bold"
                 android:layout_height="wrap_content"
@@ -192,13 +193,14 @@
                 android:textColor="@color/white" />
             <ImageView
                 android:layout_width="50dp"
+                android:layout_marginTop="6dp"
                 android:layout_gravity="center"
                 android:layout_height="50dp"
-                android:src="@drawable/partly_cloudy_icon"
+                android:src="@drawable/cloudy"
                 android:id="@+id/imageview_day2"/>
             <TextView
                 android:layout_width="match_parent"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="4dp"
                 android:textSize="24dp"
                 android:textStyle="bold"
                 android:layout_height="wrap_content"
@@ -229,13 +231,14 @@
                 android:textColor="@color/white" />
             <ImageView
                 android:layout_width="50dp"
+                android:layout_marginTop="6dp"
                 android:layout_gravity="center"
-                android:src="@drawable/sunny_icon"
+                android:src="@drawable/clear_sunny"
                 android:layout_height="50dp"
                 android:id="@+id/imageview_day3"/>
             <TextView
                 android:layout_width="match_parent"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="4dp"
                 android:textSize="24dp"
                 android:textStyle="bold"
                 android:layout_height="wrap_content"
