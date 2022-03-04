@@ -22,4 +22,12 @@ object RetrofitInstance {
             .build()
             .create(LocationAPI::class.java)
     }
+
+    val api3: RainAndForcastAPI by lazy {
+        Retrofit.Builder()
+            .baseUrl("https://api.openweathermap.org")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(RainAndForcastAPI::class.java)
+    }
 }

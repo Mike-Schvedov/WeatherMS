@@ -5,7 +5,6 @@ import android.location.Location
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
@@ -15,16 +14,16 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.tasks.Task
 import com.mikeschvedov.weatherms.Api.RetrofitInstance
-import com.mikeschvedov.weatherms.Models.Weather
+import com.mikeschvedov.weatherms.Models.RainAndForcast.Daily
 import com.mikeschvedov.weatherms.databinding.ActivityMainBinding
 import com.mikeschvedov.weatherms.util.Constants
-import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.Dispatchers.Main
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 import java.io.IOException
+import java.text.DateFormat
+import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.util.*
 import kotlin.math.roundToInt
 
 const val TAG = "MainActivity"
@@ -43,8 +42,7 @@ class MainActivity : AppCompatActivity() {
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
 
 
-        var deviceLongitude: Double
-        var deviceLatitude: Double
+        checkTimeForBGImage()
 
         // Setting the progress bar to be visible
         binding.progressBar.isVisible = true
@@ -72,6 +70,7 @@ class MainActivity : AppCompatActivity() {
                         // AFTER SUCCESSFULLY GETTING DEVICE'S COORDINATES, WE MAKE THE API CALL (USING THE COORDINATES)
                         lifecycleScope.launch  {
                             getWeather(it.latitude, it.longitude)
+                            getRainAndForcast(it.latitude, it.longitude)
                             getLocation(it.latitude, it.longitude)
                         }
                     }
@@ -80,6 +79,29 @@ class MainActivity : AppCompatActivity() {
             }
 
         }
+    }
+
+    private fun checkTimeForBGImage() {
+
+        //TODO later you can place this function inside the weather api call, so you can pass the status parameter and set background according to weathe status
+
+        // Getting the time
+        val now: LocalDateTime = LocalDateTime.now()
+
+        // Checking if it's day or night
+        if (now.hour in 8..18) {    // It is day
+
+            // Clear day
+            binding.mainLayout.setBackgroundResource(R.drawable.clear)
+
+        } else {        // It is night
+
+            // Clear night
+            binding.mainLayout.setBackgroundResource(R.drawable.clear_night)
+
+        }
+
+
     }
 
     private suspend fun getWeather(latitude: Double, longitude: Double) {
@@ -116,35 +138,97 @@ class MainActivity : AppCompatActivity() {
 
             // GETTING AND BINDING THE HUMIDITY
             val humidity : Int = response.body()!!.main.humidity
-            var humidity_str = "${humidity}%"
+            val humidity_str = "${humidity}%"
             binding.humidityTxtview.text = "לחות: ${humidity_str}"
 
-            // GETTING AND BINDING CHANCE OF RAIN
-           // val rain : Int = response.body()!!
-           // binding.rainTxtview.text = ""
-/*
-
-
-
-            // BINDING DAY 1
-            binding.day1Date.text = ""
-            binding.imageviewDay1.drawable
-            binding.tempDay1.text = ""
-
-            // BINDING DAY 2
-            binding.day2Date.text = ""
-            binding.imageviewDay2.drawable
-            binding.tempDay2.text = ""
-
-            // BINDING DAY 3
-            binding.day3Date.text = ""
-            binding.imageviewDay3.drawable
-            binding.tempDay3.text = ""*/
 
         } else {
             Log.e(TAG, "Response not successful")
         }
 
+    }
+
+
+    private suspend fun getRainAndForcast(latitude: Double, longitude: Double) {
+
+        val response = try {
+            RetrofitInstance.api3.getRainAndForcast(
+                latitude = latitude,
+                longitude = longitude,
+                units = "metric",
+                language = "he",
+                exclude = "minutely",
+                API_key = Constants.OPEN_WEATHER_API_KEY
+            )
+        } catch (e: IOException) {
+            Log.e(TAG, "IOException, you might not have internet connection (RainAndForcast)")
+            return
+        } catch (e: HttpException) {
+            Log.e(TAG, "HttpException, unexpected response (RainAndForcast)")
+            return
+        }
+        if (response.isSuccessful && response.body() != null) {
+
+
+            // ----------- SETTING PROGRESS BAR TO INVISIBLE -------------//
+            binding.progressBar.isVisible = false
+
+
+            // ----------- GETTING AND BINDING CHANCE FOR RAIN -------------//
+
+            var rain: Double = response.body()!!.hourly[1].pop
+
+            // (Convert to percentage)
+
+            rain *= 100
+
+            val rainInt = rain.roundToInt()
+
+            println("RAINNNNNNNN ${rainInt}")
+
+            binding.rainTxtview.text = "סיכוי לגשם: ${rainInt}%"
+
+            // ----------- GETTING DAILY FORECAST DATA -------------//
+
+            // ------- Get Tomorrow -------//
+            val day1: Daily = response.body()!!.daily[1]
+
+            // get date
+            binding.day1Date.text = getDay(1)
+
+            // get temp
+            binding.tempDay1.text = "${day1.temp.day.roundToInt().toString()}°"
+
+            // ------- Get Day After Tomorrow -------//
+            val day2: Daily = response.body()!!.daily[2]
+            // get date
+            binding.day2Date.text = getDay(2)
+            // get temp
+            binding.tempDay2.text = "${day2.temp.day.roundToInt().toString()}°"
+
+            // ------- Get Third Day -------//
+            val day3: Daily = response.body()!!.daily[3]
+            // get date
+            binding.day3Date.text = getDay(3)
+            // get temp
+            binding.tempDay3.text = "${day3.temp.day.roundToInt().toString()}°"
+
+        } else {
+            Log.e(TAG, "Response not successful (RainAndForcast)")
+        }
+
+    }
+
+    fun getDay(nextDay: Int): String {
+        val calendar = Calendar.getInstance()
+        val today = calendar.time
+
+        calendar.add(Calendar.DAY_OF_YEAR, nextDay)
+        val tomorrow = calendar.time
+
+        val dateFormat: DateFormat = SimpleDateFormat("dd/MM")
+
+        return dateFormat.format(tomorrow)
     }
 
 
@@ -170,7 +254,6 @@ class MainActivity : AppCompatActivity() {
             val city : String = response.body()!!.city
             val country : String = response.body()!!.countryName
 
-            Log.e("LocationAPI", "${city}, ${country}")
             binding.cityTxtview.text = "${city}, ${country}"
 
         } else {
