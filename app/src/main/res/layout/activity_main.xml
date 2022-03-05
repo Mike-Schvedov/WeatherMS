@@ -154,11 +154,12 @@
 
 
     <LinearLayout
+        android:id="@+id/linearLayout2"
         android:layout_width="match_parent"
         android:layout_height="140dp"
         android:layout_margin="12dp"
-        android:orientation="horizontal"
         android:background="@drawable/rounded_background"
+        android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -167,38 +168,51 @@
 
         <LinearLayout
             android:id="@+id/day1"
-            android:layout_weight="1"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:layout_weight="1"
             android:orientation="vertical">
 
             <TextView
+                android:id="@+id/day1_dayofweek"
                 android:layout_width="match_parent"
-                android:layout_marginTop="16dp"
-                android:textSize="14dp"
-                android:textStyle="bold"
                 android:layout_height="wrap_content"
-                android:textAlignment="center"
-                android:text="20/10"
-                android:id="@+id/day1_date"
-                android:textColor="@color/white" />
-            <ImageView
-                android:layout_width="50dp"
                 android:layout_marginTop="6dp"
-                android:layout_gravity="center"
-                android:layout_height="50dp"
-                android:src="@drawable/clear_sunny"
-                android:id="@+id/imageview_day1"/>
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_marginTop="4dp"
-                android:textSize="24dp"
-                android:textStyle="bold"
-                android:layout_height="wrap_content"
+                android:text="יום"
                 android:textAlignment="center"
-                android:text="30°"
+                android:textColor="@color/white"
+                android:textSize="14dp" />
+
+            <TextView
+                android:id="@+id/day1_date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="20/10"
+                android:textAlignment="center"
+                android:textColor="@color/white"
+                android:textSize="14dp"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:id="@+id/imageview_day1"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="6dp"
+                android:src="@drawable/clear_sunny" />
+
+            <TextView
                 android:id="@+id/temp_day1"
-                android:textColor="@color/white" />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:paddingLeft="8dp"
+                android:text="30°"
+                android:textAlignment="center"
+                android:textColor="@color/white"
+                android:textSize="24dp"
+                android:textStyle="bold" />
 
         </LinearLayout>
 
@@ -210,32 +224,45 @@
             android:orientation="vertical">
 
             <TextView
+                android:id="@+id/day2_dayofweek"
                 android:layout_width="match_parent"
-                android:layout_marginTop="16dp"
-                android:textSize="14dp"
-                android:textStyle="bold"
                 android:layout_height="wrap_content"
-                android:textAlignment="center"
-                android:text="20/10"
-                android:id="@+id/day2_date"
-                android:textColor="@color/white" />
-            <ImageView
-                android:layout_width="50dp"
                 android:layout_marginTop="6dp"
-                android:layout_gravity="center"
-                android:layout_height="50dp"
-                android:src="@drawable/cloudy"
-                android:id="@+id/imageview_day2"/>
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_marginTop="4dp"
-                android:textSize="24dp"
-                android:textStyle="bold"
-                android:layout_height="wrap_content"
+                android:text="יום"
                 android:textAlignment="center"
-                android:text="30°"
+                android:textColor="@color/white"
+                android:textSize="14dp" />
+
+            <TextView
+                android:id="@+id/day2_date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="20/10"
+                android:textAlignment="center"
+                android:textColor="@color/white"
+                android:textSize="14dp"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:id="@+id/imageview_day2"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="6dp"
+                android:src="@drawable/cloudy" />
+
+            <TextView
                 android:id="@+id/temp_day2"
-                android:textColor="@color/white" />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:paddingLeft="8dp"
+                android:text="30°"
+                android:textAlignment="center"
+                android:textColor="@color/white"
+                android:textSize="24dp"
+                android:textStyle="bold" />
 
 
         </LinearLayout>
@@ -248,36 +275,62 @@
             android:orientation="vertical">
 
             <TextView
+                android:id="@+id/day3_dayofweek"
                 android:layout_width="match_parent"
-                android:layout_marginTop="16dp"
-                android:textSize="14dp"
-                android:textStyle="bold"
                 android:layout_height="wrap_content"
-                android:textAlignment="center"
-                android:text="20/10"
-                android:id="@+id/day3_date"
-                android:textColor="@color/white" />
-            <ImageView
-                android:layout_width="50dp"
                 android:layout_marginTop="6dp"
-                android:layout_gravity="center"
-                android:src="@drawable/clear_sunny"
-                android:layout_height="50dp"
-                android:id="@+id/imageview_day3"/>
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_marginTop="4dp"
-                android:textSize="24dp"
-                android:textStyle="bold"
-                android:layout_height="wrap_content"
+                android:text="יום"
                 android:textAlignment="center"
-                android:text="30°"
+                android:textColor="@color/white"
+                android:textSize="14dp" />
+
+            <TextView
+                android:id="@+id/day3_date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="20/10"
+                android:textAlignment="center"
+                android:textColor="@color/white"
+                android:textSize="14dp"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:id="@+id/imageview_day3"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="6dp"
+                android:src="@drawable/clear_sunny" />
+
+            <TextView
                 android:id="@+id/temp_day3"
-                android:textColor="@color/white" />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:paddingLeft="8dp"
+                android:text="30°"
+                android:textAlignment="center"
+                android:textColor="@color/white"
+                android:textSize="24dp"
+                android:textStyle="bold" />
 
 
         </LinearLayout>
+
+
     </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/refresh_button"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:background="@drawable/refresh_btn"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout2"
+        app:layout_constraintVertical_bias="0.466" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

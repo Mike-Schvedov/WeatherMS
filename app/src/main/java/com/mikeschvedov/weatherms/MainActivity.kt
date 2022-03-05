@@ -22,6 +22,8 @@ import retrofit2.HttpException
 import java.io.IOException
 import java.text.DateFormat
 import java.text.SimpleDateFormat
+import java.time.DayOfWeek
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 import kotlin.math.roundToInt
@@ -49,6 +51,15 @@ class MainActivity : AppCompatActivity() {
         // Setting the loadinglayout to be visible
         binding.loadingLayout.isVisible = true
 
+
+        binding.refreshButton.setOnClickListener {
+            finish()
+            startActivity(getIntent())
+            // resetting value because it reached 3 in the last activity
+            finishedAll = 0
+
+        }
+
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED){
 
@@ -75,7 +86,7 @@ class MainActivity : AppCompatActivity() {
                             println("COORDINATES: lat-${it.latitude}  long-${it.longitude}")
 
                             getWeather(it.latitude, it.longitude)
-                            getRainAndForcast(it.latitude, it.longitude)
+                            getRainAndForecast(it.latitude, it.longitude)
                             getLocation(it.latitude, it.longitude)
 
 
@@ -88,27 +99,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun checkTimeForBGImage() {
 
-        //TODO later you can place this function inside the weather api call, so you can pass the status parameter and set background according to weathe status
-
-        // Getting the time
-        val now: LocalDateTime = LocalDateTime.now()
-
-        // Checking if it's day or night
-        if (now.hour in 8..18) {    // It is day
-
-            // Clear day
-            binding.mainLayout.setBackgroundResource(R.drawable.clear)
-
-        } else {        // It is night
-
-            // Clear night
-            binding.mainLayout.setBackgroundResource(R.drawable.clear_night)
-
-        }
-
-    }
 
     private suspend fun getWeather(latitude: Double, longitude: Double) {
 
@@ -141,8 +132,9 @@ class MainActivity : AppCompatActivity() {
 
             // GETTING AND BINDING THE HUMIDITY
             val humidity: Int = response.body()!!.main.humidity
-            val humidity_str = "${humidity}%"
-            binding.humidityTxtview.text = "לחות: ${humidity_str}"
+            val humidityStr = "${humidity}%"
+            println("================= HUMIDITY ================ $humidityStr")
+            binding.humidityTxtview.text = "לחות: ${humidityStr}"
 
 
             // ---------------------------- CHECKING IF ALL DATA WAS FETCHED and MAKE THE LOADING LAYOUT INVISIBLE --------------------------//
@@ -157,8 +149,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-
-    private suspend fun getRainAndForcast(latitude: Double, longitude: Double) {
+    private suspend fun getRainAndForecast(latitude: Double, longitude: Double) {
 
         val response = try {
             RetrofitInstance.api3.getRainAndForcast(
@@ -198,8 +189,11 @@ class MainActivity : AppCompatActivity() {
             // ------------------------------- Get DAY 1 (Tomorrow) -------------------------------------//
             val day1: Daily = response.body()!!.daily[1]
 
-            // get date
+            // get and set date
             binding.day1Date.text = getDay(1)
+
+            // get and set day of week
+            binding.day1Dayofweek.text = getDayOfWeek(1)
 
             // get temp
             binding.tempDay1.text = "${day1.temp.day.roundToInt().toString()}°"
@@ -231,6 +225,9 @@ class MainActivity : AppCompatActivity() {
             // get date
             binding.day2Date.text = getDay(2)
 
+            // get and set day of week
+            binding.day2Dayofweek.text = getDayOfWeek(2)
+
             // get temp
             binding.tempDay2.text = "${day2.temp.day.roundToInt().toString()}°"
 
@@ -261,6 +258,9 @@ class MainActivity : AppCompatActivity() {
 
             // get date
             binding.day3Date.text = getDay(3)
+
+            // get and set day of week
+            binding.day3Dayofweek.text = getDayOfWeek(3)
 
             // get temp
             binding.tempDay3.text = "${day3.temp.day.roundToInt().toString()}°"
@@ -297,34 +297,6 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun checkStatusID(description: String): Int {
-
-        return when (description) {
-
-            "מעונן חלקית" -> 1
-            "שמיים בהירים" -> 2
-            "גשם קל" -> 3
-            "עננים בודדים" -> 4
-            "מעונן" -> 5
-            "שברי ענן" -> 6
-            else -> 0
-
-        }
-
-    }
-
-
-    fun getDay(nextDay: Int): String {
-        val calendar = Calendar.getInstance()
-        val today = calendar.time
-
-        calendar.add(Calendar.DAY_OF_YEAR, nextDay)
-        val tomorrow = calendar.time
-
-        val dateFormat: DateFormat = SimpleDateFormat("dd/MM")
-
-        return dateFormat.format(tomorrow)
-    }
 
 
     private suspend fun getLocation(latitude: Double, longitude: Double) {
@@ -368,6 +340,66 @@ class MainActivity : AppCompatActivity() {
 
         } else {
             Log.e(TAG, "Response not successful (getLocation)")
+        }
+
+    }
+
+    private fun checkStatusID(description: String): Int {
+
+        return when (description) {
+
+            "מעונן חלקית" -> 1
+            "שמיים בהירים" -> 2
+            "גשם קל" -> 3
+            "עננים בודדים" -> 4
+            "מעונן" -> 5
+            "שברי ענן" -> 6
+            else -> 0
+
+        }
+
+    }
+
+    private fun getDay(nextDay: Int): String {
+        val calendar = Calendar.getInstance()
+
+        calendar.add(Calendar.DAY_OF_YEAR, nextDay)
+        val tomorrow = calendar.time
+
+        val dateFormat: DateFormat = SimpleDateFormat("dd/MM")
+
+        return dateFormat.format(tomorrow)
+    }
+
+    private fun getDayOfWeek(nextDay: Int): String {
+        val calendar = Calendar.getInstance()
+
+        calendar.add(Calendar.DAY_OF_WEEK, nextDay)
+        val day = calendar.time
+
+        val dateFormat: DateFormat = SimpleDateFormat("EEE")
+
+        return dateFormat.format(day)
+    }
+
+    private fun checkTimeForBGImage() {
+
+        //TODO later you can place this function inside the weather api call, so you can pass the status parameter and set background according to weathe status
+
+        // Getting the time
+        val now: LocalDateTime = LocalDateTime.now()
+
+        // Checking if it's day or night
+        if (now.hour in 8..18) {    // It is day
+
+            // Clear day
+            binding.mainLayout.setBackgroundResource(R.drawable.clear)
+
+        } else {        // It is night
+
+            // Clear night
+            binding.mainLayout.setBackgroundResource(R.drawable.clear_night)
+
         }
 
     }
