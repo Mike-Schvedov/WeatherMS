@@ -28,6 +28,8 @@ import kotlin.math.roundToInt
 
 const val TAG = "MainActivity"
 
+var finishedAll:Int = 0
+
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
@@ -41,11 +43,11 @@ class MainActivity : AppCompatActivity() {
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
 
-
+        // Getting the time to set the background image
         checkTimeForBGImage()
 
-        // Setting the progress bar to be visible
-        binding.progressBar.isVisible = true
+        // Setting the loadinglayout to be visible
+        binding.loadingLayout.isVisible = true
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED){
@@ -69,9 +71,14 @@ class MainActivity : AppCompatActivity() {
 
                         // AFTER SUCCESSFULLY GETTING DEVICE'S COORDINATES, WE MAKE THE API CALL (USING THE COORDINATES)
                         lifecycleScope.launch  {
+
+                            println("COORDINATES: lat-${it.latitude}  long-${it.longitude}")
+
                             getWeather(it.latitude, it.longitude)
                             getRainAndForcast(it.latitude, it.longitude)
                             getLocation(it.latitude, it.longitude)
+
+
                         }
                     }
                 }
@@ -101,7 +108,6 @@ class MainActivity : AppCompatActivity() {
 
         }
 
-
     }
 
     private suspend fun getWeather(latitude: Double, longitude: Double) {
@@ -125,22 +131,25 @@ class MainActivity : AppCompatActivity() {
 
             //GETTING CITY AND COUNTRY USING THE COORDINATES
 
-            // SETTING PROGRESS BAR TO INVISIBLE
-            binding.progressBar.isVisible = false
-
             // FORMATTING THE TEMPERATURE AND BINDING TO VIEW
-            val temp : Int = response.body()!!.main.temp.roundToInt()
+            val temp: Int = response.body()!!.main.temp.roundToInt()
             binding.temperatureTxtview.text = "${temp}°"
 
             // GETTING AND BINDING THE WEATHER DESCRIPTION
-            val status : String = response.body()!!.weather[0].description
+            val status: String = response.body()!!.weather[0].description
             binding.statusTxtview.text = "${status}"
 
             // GETTING AND BINDING THE HUMIDITY
-            val humidity : Int = response.body()!!.main.humidity
+            val humidity: Int = response.body()!!.main.humidity
             val humidity_str = "${humidity}%"
             binding.humidityTxtview.text = "לחות: ${humidity_str}"
 
+
+            // ---------------------------- CHECKING IF ALL DATA WAS FETCHED and MAKE THE LOADING LAYOUT INVISIBLE --------------------------//
+            finishedAll += 1
+            if (finishedAll == 3) {
+                binding.loadingLayout.isVisible = false
+            }
 
         } else {
             Log.e(TAG, "Response not successful")
@@ -168,10 +177,6 @@ class MainActivity : AppCompatActivity() {
             return
         }
         if (response.isSuccessful && response.body() != null) {
-
-
-            // ----------- SETTING PROGRESS BAR TO INVISIBLE -------------//
-            binding.progressBar.isVisible = false
 
 
             // ----------- GETTING AND BINDING CHANCE FOR RAIN -------------//
@@ -204,13 +209,13 @@ class MainActivity : AppCompatActivity() {
 
             val statusID: Int = checkStatusID(day1.weather[0].description)
 
-            when(statusID){
+            when (statusID) {
 
-                1,4 ->
+                1, 4 ->
                     binding.imageviewDay1.setImageResource(R.drawable.partly_cloud)
                 2 ->
                     binding.imageviewDay1.setImageResource(R.drawable.clear_sunny)
-                3,6 ->
+                3, 6 ->
                     binding.imageviewDay1.setImageResource(R.drawable.rain)
                 5 ->
                     binding.imageviewDay1.setImageResource(R.drawable.cloudy)
@@ -235,13 +240,13 @@ class MainActivity : AppCompatActivity() {
 
             val statusID2: Int = checkStatusID(day2.weather[0].description)
 
-            when(statusID2){
+            when (statusID2) {
 
-                1,4 ->
+                1, 4 ->
                     binding.imageviewDay2.setImageResource(R.drawable.partly_cloud)
                 2 ->
                     binding.imageviewDay2.setImageResource(R.drawable.clear_sunny)
-                3,6 ->
+                3, 6 ->
                     binding.imageviewDay2.setImageResource(R.drawable.rain)
                 5 ->
                     binding.imageviewDay2.setImageResource(R.drawable.cloudy)
@@ -249,7 +254,6 @@ class MainActivity : AppCompatActivity() {
                 else ->
                     binding.imageviewDay2.setImageResource(R.drawable.error)
             }
-
 
 
             // ------------------------------- Get DAY 3-------------------------------------//
@@ -266,13 +270,13 @@ class MainActivity : AppCompatActivity() {
 
             val statusID3: Int = checkStatusID(day3.weather[0].description)
 
-            when(statusID3){
+            when (statusID3) {
 
-                1,4 ->
+                1, 4 ->
                     binding.imageviewDay3.setImageResource(R.drawable.partly_cloud)
                 2 ->
                     binding.imageviewDay3.setImageResource(R.drawable.clear_sunny)
-                3,6 ->
+                3, 6 ->
                     binding.imageviewDay3.setImageResource(R.drawable.rain)
                 5 ->
                     binding.imageviewDay3.setImageResource(R.drawable.cloudy)
@@ -281,18 +285,21 @@ class MainActivity : AppCompatActivity() {
                     binding.imageviewDay3.setImageResource(R.drawable.error)
             }
 
+            // ---------------------------- CHECKING IF ALL DATA WAS FETCHED and MAKE THE LOADING LAYOUT INVISIBLE --------------------------//
+            finishedAll += 1
+            if (finishedAll == 3) {
+                binding.loadingLayout.isVisible = false
+            }
 
         } else {
-            Log.e(TAG, "Response not successful (RainAndForcast)")
+            Log.e(TAG, "Response not successful (RainAndForecast)")
         }
 
     }
 
-
-
     private fun checkStatusID(description: String): Int {
 
-        return when(description){
+        return when (description) {
 
             "מעונן חלקית" -> 1
             "שמיים בהירים" -> 2
@@ -305,9 +312,6 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
-
-
-
 
 
     fun getDay(nextDay: Int): String {
@@ -342,10 +346,25 @@ class MainActivity : AppCompatActivity() {
         if (response.isSuccessful && response.body() != null) {
 
             // GETTING AND BINDING CITY AND COUNTRY NAMES
-            val city : String = response.body()!!.city
-            val country : String = response.body()!!.countryName
+            var city: String = response.body()!!.city
+            val country: String = response.body()!!.countryName
 
-            binding.cityTxtview.text = "${city}, ${country}"
+            println("CITY :${city}  COUNTRY: ${country}")
+
+            // ------- Manually deciding location if failed to find small city/village
+            if (city == "") {
+
+                city = decideActualCity(latitude, longitude) //returns a string
+
+                binding.cityTxtview.text = "${city}, ${country}"
+
+            }
+
+            // ---------------------------- CHECKING IF ALL DATA WAS FETCHED and MAKE THE LOADING LAYOUT INVISIBLE --------------------------//
+            finishedAll += 1
+            if (finishedAll == 3) {
+                binding.loadingLayout.isVisible = false
+            }
 
         } else {
             Log.e(TAG, "Response not successful (getLocation)")
@@ -353,6 +372,24 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    private fun decideActualCity(latitude: Double, longitude: Double): String {
+
+        return if (checkIfMassad(latitude, longitude)) {
+            "מסד"
+        } else {
+            "lat:${latitude}long:${longitude}"
+        }
+
+    }
+
+    private fun checkIfMassad(latitude: Double, longitude: Double): Boolean {
+
+        val formattedLat = (latitude * 100).toInt() / 100.00
+        val formattedLong = (longitude * 100).toInt() / 100.00
+
+        return formattedLat == 32.84 && formattedLong == 35.42 //return true if this is true
+
+    }
 
 
 }
