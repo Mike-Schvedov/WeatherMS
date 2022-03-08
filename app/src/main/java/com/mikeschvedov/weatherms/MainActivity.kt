@@ -5,6 +5,7 @@ import android.location.Location
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
@@ -22,15 +23,13 @@ import retrofit2.HttpException
 import java.io.IOException
 import java.text.DateFormat
 import java.text.SimpleDateFormat
-import java.time.DayOfWeek
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 import kotlin.math.roundToInt
 
 const val TAG = "MainActivity"
 
-var finishedAll:Int = 0
+var finishedAll: Int = 0
 
 class MainActivity : AppCompatActivity() {
 
@@ -61,30 +60,40 @@ class MainActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED){
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
 
 
                 //-------------- GET COORDINATES OF THE DEVICE --------------//
 
-                val task : Task<Location> = fusedLocationProviderClient.lastLocation
+                val task: Task<Location> = fusedLocationProviderClient.lastLocation
 
-                if(ActivityCompat.checkSelfPermission(applicationContext, android.Manifest.permission.ACCESS_FINE_LOCATION)
+                if (ActivityCompat.checkSelfPermission(
+                        applicationContext,
+                        android.Manifest.permission.ACCESS_FINE_LOCATION
+                    )
                     != PackageManager.PERMISSION_GRANTED
-                    && ActivityCompat.checkSelfPermission(applicationContext, android.Manifest.permission.ACCESS_COARSE_LOCATION)
+                    && ActivityCompat.checkSelfPermission(
+                        applicationContext,
+                        android.Manifest.permission.ACCESS_COARSE_LOCATION
+                    )
                     != PackageManager.PERMISSION_GRANTED
-                ){
-                    ActivityCompat.requestPermissions(this@MainActivity, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), 101)
+                ) {
+                    ActivityCompat.requestPermissions(
+                        this@MainActivity,
+                        arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION),
+                        101
+                    )
                     return@repeatOnLifecycle
                 }
                 task.addOnSuccessListener {
-                    if(it != null){
+                    if (it != null) {
                         Log.e("Main", "success")
 
                         // AFTER SUCCESSFULLY GETTING DEVICE'S COORDINATES, WE MAKE THE API CALL (USING THE COORDINATES)
-                        lifecycleScope.launch  {
+                        lifecycleScope.launch {
 
                             println("COORDINATES: lat-${it.latitude}  long-${it.longitude}")
-
+                            Toast.makeText(applicationContext, "${it.latitude}  long-${it.longitude}", Toast.LENGTH_LONG).show()
                             getWeather(it.latitude, it.longitude)
                             getRainAndForecast(it.latitude, it.longitude)
                             getLocation(it.latitude, it.longitude)
@@ -98,7 +107,6 @@ class MainActivity : AppCompatActivity() {
 
         }
     }
-
 
 
     private suspend fun getWeather(latitude: Double, longitude: Double) {
@@ -209,7 +217,7 @@ class MainActivity : AppCompatActivity() {
                     binding.imageviewDay1.setImageResource(R.drawable.partly_cloud)
                 2 ->
                     binding.imageviewDay1.setImageResource(R.drawable.clear_sunny)
-                3, 6 ->
+                3, 6, 7 ->
                     binding.imageviewDay1.setImageResource(R.drawable.rain)
                 5 ->
                     binding.imageviewDay1.setImageResource(R.drawable.cloudy)
@@ -243,7 +251,7 @@ class MainActivity : AppCompatActivity() {
                     binding.imageviewDay2.setImageResource(R.drawable.partly_cloud)
                 2 ->
                     binding.imageviewDay2.setImageResource(R.drawable.clear_sunny)
-                3, 6 ->
+                3, 6, 7 ->
                     binding.imageviewDay2.setImageResource(R.drawable.rain)
                 5 ->
                     binding.imageviewDay2.setImageResource(R.drawable.cloudy)
@@ -276,7 +284,7 @@ class MainActivity : AppCompatActivity() {
                     binding.imageviewDay3.setImageResource(R.drawable.partly_cloud)
                 2 ->
                     binding.imageviewDay3.setImageResource(R.drawable.clear_sunny)
-                3, 6 ->
+                3, 6, 7 ->
                     binding.imageviewDay3.setImageResource(R.drawable.rain)
                 5 ->
                     binding.imageviewDay3.setImageResource(R.drawable.cloudy)
@@ -298,7 +306,6 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-
     private suspend fun getLocation(latitude: Double, longitude: Double) {
 
         val response = try {
@@ -318,31 +325,37 @@ class MainActivity : AppCompatActivity() {
         if (response.isSuccessful && response.body() != null) {
 
             // GETTING AND BINDING CITY AND COUNTRY NAMES
-            var city: String = response.body()!!.city
+            val city: String = response.body()!!.city
             val country: String = response.body()!!.countryName
 
-            println("CITY :${city}  COUNTRY: ${country}")
+            println("DATA RECEIVED FROM API ---- CITY :${city}  COUNTRY: ${country}")
 
             // ------- Manually deciding location if failed to find small city/village
-            if (city == "") {
+            if (city.isBlank()) {
 
-                city = decideActualCity(latitude, longitude) //returns a string
+                // Will return actuall city or if not found, will return the coordinates
+              val newCity = getCityWithoutAPI(latitude, longitude) //returns a string
 
-                binding.cityTxtview.text = "${city}, ${country}"
-
-            }
+                binding.cityTxtview.text = "${newCity}, ${country}"
+                println("FOUND NEW CITY : ${newCity}")
+            }else{
+              binding.cityTxtview.text = "${city}, ${country}"
+             }
 
             // ---------------------------- CHECKING IF ALL DATA WAS FETCHED and MAKE THE LOADING LAYOUT INVISIBLE --------------------------//
             finishedAll += 1
             if (finishedAll == 3) {
                 binding.loadingLayout.isVisible = false
+            } else {
+                Log.e(TAG, "Response not successful (getLocation)")
             }
-
-        } else {
-            Log.e(TAG, "Response not successful (getLocation)")
         }
-
     }
+
+
+
+
+
 
     private fun checkStatusID(description: String): Int {
 
@@ -354,6 +367,7 @@ class MainActivity : AppCompatActivity() {
             "עננים בודדים" -> 4
             "מעונן" -> 5
             "שברי ענן" -> 6
+            "גשם בינוני" -> 7
             else -> 0
 
         }
@@ -404,7 +418,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun decideActualCity(latitude: Double, longitude: Double): String {
+    private fun getCityWithoutAPI(latitude: Double, longitude: Double): String {
 
         return if (checkIfMassad(latitude, longitude)) {
             "מסד"
